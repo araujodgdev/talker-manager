@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
+const { v4: uuidV4 } = require('uuid');
 
 const OK = 200;
 // const CREATED = 201;
@@ -39,6 +40,11 @@ async function readTalkerFile() {
   }
 }
 
+function generateRandomToken() {
+  const token = uuidV4().slice(0, 16);
+  return token;
+}
+
 // iniciando o projeto!!! :rocket:
 
 // Req 01
@@ -74,6 +80,21 @@ app.get('/talker/:id', async (req, res) => {
     }
 
     res.status(OK).json(talkerFound);
+  } catch (error) {
+    res.status(INTERNAL_SERVER_ERROR).send({
+      message: error.message,
+    });
+  }
+});
+
+// Req 03 
+
+app.post('/login', (req, res) => {
+  try {
+    const token = generateRandomToken();
+    res.status(OK).json({
+      token,
+    });
   } catch (error) {
     res.status(INTERNAL_SERVER_ERROR).send({
       message: error.message,

@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs').promises;
 
 const OK = 200;
-const CREATED = 201;
+// const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
 // const NOT_FOUND = 404;
 // const BAD_REQUEST = 400;
@@ -28,7 +28,7 @@ app.listen(PORT, () => {
 });
 
 // iniciando o projeto!!! :rocket:
-app.get("/talker", async (req, res) => {
+app.get('/talker', async (req, res) => {
   try {
     const talkerData = await fs.readFile(TALKER_FILE_PATH);
     const parsed = JSON.parse(talkerData);
@@ -37,10 +37,10 @@ app.get("/talker", async (req, res) => {
       res.status(200).json([])
     }
 
-    res.status(OK).json(parsed)
+    res.status(OK).json(parsed);
   } catch (error) {
     res.status(INTERNAL_SERVER_ERROR).send({
-      message: error.message
-    })
+      message: error.message,
+    });
   }
-})
+});

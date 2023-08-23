@@ -11,28 +11,35 @@ const validateRequiredFields = (req, res, next) => {
       message: 'O campo "password" é obrigatório',
     });
   }
-
   next();
 };
 
-const validateFieldFormat = (req, res, next) => {
+const validateEmailFormat = (req, res, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isValidEmail = emailRegex.test(req.body.email);
-  const isValidPassword = req.body.password >= 6;
-  if (!isValidEmail) {
+  if (isValidEmail) {
+    next();
+  } else {
     res.status(400).send({
       message: 'O "email" deve ter o formato "email@email.com"',
     });
   }
-  if (!isValidPassword) {
+};
+
+const validatePasswordLength = (req, res, next) => {
+  const { password } = req.body;
+  const isValidPassword = password.length >= 6;
+  if (isValidPassword) {
+    next();
+  } else {
     res.status(400).send({
       message: 'O "password" deve ter pelo menos 6 caracteres',
     });
   }
-  next();
 };
 
 module.exports = {
   validateRequiredFields,
-  validateFieldFormat,
+  validateEmailFormat,
+  validatePasswordLength,
 };

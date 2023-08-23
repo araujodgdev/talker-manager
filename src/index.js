@@ -3,7 +3,11 @@ const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidV4 } = require('uuid');
 
-const { validateRequiredFields, validateEmailFormat, validatePasswordLength } = require('./middlewares/validateLogin');
+const {
+  validateRequiredFields,
+  validateEmailFormat,
+  validatePasswordLength,
+} = require('./middlewares/validateLogin');
 
 const OK = 200;
 // const CREATED = 201;
@@ -91,15 +95,21 @@ app.get('/talker/:id', async (req, res) => {
 
 // Req 03 e Req 04
 
-app.post('/login', validateRequiredFields, validateEmailFormat, validatePasswordLength, (req, res) => {
-  try {
-    const token = generateRandomToken();
-    res.status(OK).json({
-      token,
-    });
-  } catch (error) {
-    res.status(INTERNAL_SERVER_ERROR).send({
-      message: error.message,
-    });
-  }
-});
+app.post(
+  '/login',
+  validateRequiredFields,
+  validateEmailFormat,
+  validatePasswordLength,
+  (req, res) => {
+    try {
+      const token = generateRandomToken();
+      res.status(OK).json({
+        token,
+      });
+    } catch (error) {
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: error.message,
+      });
+    }
+  },
+);

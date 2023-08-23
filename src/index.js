@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidV4 } = require('uuid');
 
+const { validateRequiredFields, validateFieldFormat } = require('./middlewares/validateLogin');
+
 const OK = 200;
 // const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
@@ -87,9 +89,9 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-// Req 03 
+// Req 03 e Req 04
 
-app.post('/login', (req, res) => {
+app.post('/login', validateRequiredFields, validateFieldFormat, (req, res) => {
   try {
     const token = generateRandomToken();
     res.status(OK).json({

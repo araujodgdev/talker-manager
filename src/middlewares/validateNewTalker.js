@@ -63,8 +63,6 @@ const validateWatchedAt = (req, res, next) => {
 const validateWatchedAtQuery = (req, res, next) => {
   const { date } = req.query;
   if (date && !validateDateFormat(date)) {
-    // const validData = validateDateFormat(date);
-    //  if (validData) next();
      return res
      .status(400)
      .json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' });

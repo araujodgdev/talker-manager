@@ -1,13 +1,13 @@
 const validateRequiredFields = (req, res, next) => {
   const requiredFields = ['email', 'password'];
   if (requiredFields[0] in req.body === false) {
-    res.status(400).send({
+    return res.status(400).send({
       message: 'O campo "email" é obrigatório',
     });
   }
 
   if (requiredFields[1] in req.body === false) {
-    res.status(400).send({
+    return res.status(400).send({
       message: 'O campo "password" é obrigatório',
     });
   }
@@ -20,7 +20,7 @@ const validateEmailFormat = (req, res, next) => {
   if (isValidEmail) {
     next();
   } else {
-    res.status(400).send({
+    return res.status(400).send({
       message: 'O "email" deve ter o formato "email@email.com"',
     });
   }
@@ -32,7 +32,7 @@ const validatePasswordLength = (req, res, next) => {
   if (isValidPassword) {
     next();
   } else {
-    res.status(400).send({
+    return res.status(400).send({
       message: 'O "password" deve ter pelo menos 6 caracteres',
     });
   }

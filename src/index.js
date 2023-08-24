@@ -1,4 +1,5 @@
 const express = require('express');
+require('express-async-errors');
 const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidV4 } = require('uuid');
@@ -9,8 +10,15 @@ const {
   validatePasswordLength,
 } = require('./middlewares/validateLogin');
 
+const {
+  validateAuthorization,
+  validateName,
+  validateAge,
+  validateTalk,
+} = require('./middlewares/validateNewTalker');
+
 const OK = 200;
-// const CREATED = 201;
+const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
 const NOT_FOUND = 404;
 // const BAD_REQUEST = 400;
@@ -49,6 +57,18 @@ async function readTalkerFile() {
 function generateRandomToken() {
   const token = uuidV4().slice(0, 16);
   return token;
+}
+
+async function writeNewTalker(talkerData) {
+  try {
+    const talkerFile = await readTalkerFile();
+    const id = talkerFile.length + 1;
+    const newTalkers = [...talkerFile, { id, ...talkerData }];
+    await fs.writeFile(TALKER_FILE_PATH, JSON.stringify(newTalkers));
+    return { id, ...talkerData };
+  } catch (error) {
+    return error.message;
+  }
 }
 
 // iniciando o projeto!!! :rocket:
@@ -106,6 +126,25 @@ app.post(
       res.status(OK).json({
         token,
       });
+    } catch (error) {
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: error.message,
+      });
+    }
+  },
+);
+
+app.post(
+  '/talker',
+  validateAuthorization,
+  validateName,
+  validateAge,
+  validateTalk,
+  async (req, res) => {
+    try {
+      const { name, age, talk } = req.body;
+      const newTalker = await writeNewTalker({ name, age, talk });
+      res.status(CREATED).json(newTalker);
     } catch (error) {
       res.status(INTERNAL_SERVER_ERROR).send({
         message: error.message,

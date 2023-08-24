@@ -15,6 +15,8 @@ const {
   validateName,
   validateAge,
   validateTalk,
+  validateWatchedAt,
+  validateRate,
 } = require('./middlewares/validateNewTalker');
 
 const OK = 200;
@@ -63,8 +65,9 @@ async function writeNewTalker(talkerData) {
   try {
     const talkerFile = await readTalkerFile();
     const id = talkerFile.length + 1;
-    const newTalkers = [...talkerFile, { id, ...talkerData }];
-    await fs.writeFile(TALKER_FILE_PATH, JSON.stringify(newTalkers));
+    talkerFile.push({ id, ...talkerData });
+    const newTalkerFile = JSON.stringify(talkerFile);
+    await fs.writeFile(TALKER_FILE_PATH, newTalkerFile);
     return { id, ...talkerData };
   } catch (error) {
     return error.message;
@@ -140,6 +143,8 @@ app.post(
   validateName,
   validateAge,
   validateTalk,
+  validateRate,
+  validateWatchedAt,
   async (req, res) => {
     try {
       const { name, age, talk } = req.body;

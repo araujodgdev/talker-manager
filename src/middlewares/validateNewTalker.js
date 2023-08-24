@@ -1,12 +1,10 @@
-const { parse, isValid } = require('date-fns');
-
 const validateAuthorization = (req, res, next) => {
   const token = req.headers.authorization;
   if (!token) {
-    res.status(401).send({ message: 'Token não encontrado' });
+    return res.status(401).json({ message: 'Token não encontrado' });
   }
   if (token.length !== 16 || typeof token !== 'string') {
-    res.status(401).json({ message: 'Token inválido' });
+    return res.status(401).json({ message: 'Token inválido' });
   }
   next();
 };
@@ -14,13 +12,13 @@ const validateAuthorization = (req, res, next) => {
 const validateName = (req, res, next) => {
   const { name } = req.body;
   if (!name) {
-    res.status(400).send({ message: 'O campo "name" é obrigatório' });
+    return res.status(400).json({ message: 'O campo "name" é obrigatório' });
   }
 
   if (name.length < 3) {
-    res
+    return res
       .status(400)
-      .send({ message: 'O "name" deve ter pelo menos 3 caracteres' });
+      .json({ message: 'O "name" deve ter pelo menos 3 caracteres' });
   }
 
   next();
@@ -29,13 +27,13 @@ const validateName = (req, res, next) => {
 const validateAge = (req, res, next) => {
   const { age } = req.body;
   if (!age) {
-    res.status(400).send({ message: 'O campo "age" é obrigatório' });
+    return res.status(400).json({ message: 'O campo "age" é obrigatório' });
   }
 
   if (age < 18 || !Number.isInteger(age)) {
-    res
+    return res
       .status(400)
-      .send({
+      .json({
         message:
           'O campo "age" deve ser um número inteiro igual ou maior que 18',
       });
@@ -44,41 +42,40 @@ const validateAge = (req, res, next) => {
 };
 
 const validateDateFormat = (date) => {
-  const dateFormat = 'dd/MM/yyyy';
-  const parsedDate = parse(date, dateFormat, new Date());
-  return isValid(parsedDate);
+  const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+
+  return regex.test(date);
 };
 
-const validateWatchedAt = (watchedAt, res) => {
+const validateWatchedAt = (req, res, next) => {
+  const { talk: { watchedAt } } = req.body;
+  if (!watchedAt) {
+    return res.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
+  }
   if (!validateDateFormat(watchedAt)) {
-    res
+    return res
       .status(400)
-      .send({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
+      .json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
   }
+  next();
 };
 
-const validateRate = (rate, res) => {
-  if (rate < 1 || rate > 5 || !Number.isInteger(rate) || rate === 0) {
-    res.status(400).send({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+const validateRate = (req, res, next) => {
+  const { talk: { rate } } = req.body;
+  if (rate === undefined) {
+    return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
+  if (!Number.isInteger(rate) || rate < 1 || rate > 5) {
+    res.status(400).json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+  }
+  next();
 };
 
 const validateTalk = (req, res, next) => {
   const { talk } = req.body;
   if (!talk) {
-    res.status(400).send({ message: 'O campo "talk" é obrigatório' });
+    return res.status(400).json({ message: 'O campo "talk" é obrigatório' });
   }
-  const { watchedAt, rate } = talk;
-  if (!watchedAt) {
-    res.status(400).send({ message: 'O campo "watchedAt" é obrigatório' });
-  } else if (!validateDateFormat(watchedAt)) {
-    res.status(400).send({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
-  }
-  validateWatchedAt(watchedAt, res);
-  if (!rate) {
-    res.status(400).send({ message: 'O campo "rate" é obrigatório' });
-  }
-  validateRate(rate, res);
   next();
 };
 
@@ -87,4 +84,6 @@ module.exports = {
   validateName,
   validateAge,
   validateTalk,
+  validateWatchedAt,
+  validateRate,
 };

@@ -78,6 +78,7 @@ async function updateTalker(id, talkerData) {
   try {
     const talkerFile = await readTalkerFile();
     const talkerIndex = talkerFile.findIndex((talker) => talker.id === Number(id));
+    if (talkerIndex === undefined) throw new Error('Pessoa palestrante não encontrada');
     talkerFile[talkerIndex] = { id, ...talkerData };
     const newTalkerFile = JSON.stringify(talkerFile);
     await fs.writeFile(TALKER_FILE_PATH, newTalkerFile);

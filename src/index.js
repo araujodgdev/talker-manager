@@ -165,7 +165,7 @@ app.put(
           message: 'Pessoa palestrante não encontrada',
         });
       }
-      const updatedTalker = await updateTalker(id, { name, age, talk });
+      const updatedTalker = await updateTalker(Number(id), { name, age, talk });
     res.status(OK).json(updatedTalker);
     } catch (error) {
       return res.status(INTERNAL_SERVER_ERROR).send({

@@ -116,6 +116,22 @@ app.get('/talker', async (req, res) => {
   }
 });
 
+app.get('/talker/search', validateAuthorization, async (req, res) => {
+  try {
+    const { q } = req.query;
+    const talkerData = await readTalkerFile();
+    if (q === undefined || q === '') {
+      return res.status(OK).json(talkerData);
+    }
+    const filteredTalkers = talkerData.filter((talker) => talker.name.includes(q));
+    res.status(OK).json(filteredTalkers);
+  } catch (error) {
+    res.status(INTERNAL_SERVER_ERROR).send({
+      message: error.message,
+    }); 
+  }
+});
+
 // Req 02
 
 app.get('/talker/:id', async (req, res) => {

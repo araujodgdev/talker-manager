@@ -77,11 +77,21 @@ async function updateTalker(id, talkerData) {
   try {
     const talkerFile = await readTalkerFile();
     const talkerIndex = talkerFile.findIndex((talker) => talker.id === Number(id));
-    if (talkerIndex === undefined) throw new Error('Pessoa palestrante não encontrada');
     talkerFile[talkerIndex] = { id, ...talkerData };
     const newTalkerFile = JSON.stringify(talkerFile);
     await fs.writeFile(TALKER_FILE_PATH, newTalkerFile);
     return { id, ...talkerData };
+  } catch (error) {
+    return error.message;
+  }
+}
+
+async function deleteTalker(id) {
+  try {
+    const talkerFile = await readTalkerFile();
+    const filteredTalkers = talkerFile.filter((talker) => talker.id !== Number(id));
+    const newTalkerFile = JSON.stringify(filteredTalkers);
+    await fs.writeFile(TALKER_FILE_PATH, newTalkerFile);
   } catch (error) {
     return error.message;
   }
@@ -183,15 +193,31 @@ app.put(
     try {
       const { id } = req.params;
       const { name, age, talk } = req.body;
-      const updatedTalker = await updateTalker(id, { name, age, talk });
       const talkerFile = await readTalkerFile();
       const talkerIndex = talkerFile.findIndex((talker) => talker.id === Number(id));
       if (talkerIndex < 0) {
-        return res.status(NOT_FOUND).json({
+        res.status(NOT_FOUND).json({
           message: 'Pessoa palestrante não encontrada',
         });
       }
+      const updatedTalker = await updateTalker(id, { name, age, talk });
     res.status(OK).json(updatedTalker);
+    } catch (error) {
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: error.message,
+      });
+    }
+  },
+);
+
+app.delete(
+  '/talker/:id',
+  validateAuthorization,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      await deleteTalker(id);
+      res.status(204).json();
     } catch (error) {
       res.status(INTERNAL_SERVER_ERROR).send({
         message: error.message,

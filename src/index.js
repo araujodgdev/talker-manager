@@ -17,15 +17,13 @@ const {
   validateWatchedAt,
   validateRate,
   validateQueryRate,
+  validateWatchedAtQuery,
 } = require('./middlewares/validateNewTalker');
 
 const OK = 200;
 const CREATED = 201;
 const INTERNAL_SERVER_ERROR = 500;
 const NOT_FOUND = 404;
-// const BAD_REQUEST = 400;
-// const UNPROCESSABLE_CONTENT = 422;
-// const UNAUTHORIZED = 401;
 
 const TALKER_FILE_PATH = path.resolve(__dirname, './talker.json');
 
@@ -37,7 +35,6 @@ const PORT = process.env.PORT || '3001';
 
 app.use(express.json());
 
-// não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
@@ -98,9 +95,6 @@ async function deleteTalker(id) {
   }
 }
 
-// iniciando o projeto!!! :rocket:
-
-// Req 01
 app.get('/talker', async (req, res) => {
   try {
     const talkerData = await readTalkerFile();
@@ -117,13 +111,20 @@ app.get('/talker', async (req, res) => {
   }
 });
 
-app.get('/talker/search', validateAuthorization, validateQueryRate, async (req, res) => {
+app.get('/talker/search',
+  validateAuthorization,
+  validateQueryRate,
+  validateWatchedAtQuery,
+  async (req, res) => {
   try {
-    const { q, rate } = req.query;
+    const { q, rate, date } = req.query;
     let talkerData = await readTalkerFile();
     if (q) talkerData = talkerData.filter((talker) => talker.name.includes(q));
     if (rate) {
       talkerData = talkerData.filter((talker) => talker.talk.rate === Number(rate));
+    }
+    if (date) {
+      talkerData = talkerData.filter((talker) => talker.talk.watchedAt === date);
     }
     res.status(OK).json(talkerData);
   } catch (error) {
@@ -132,8 +133,6 @@ app.get('/talker/search', validateAuthorization, validateQueryRate, async (req, 
     }); 
   }
 });
-
-// Req 02
 
 app.get('/talker/:id', async (req, res) => {
   try {
@@ -155,8 +154,6 @@ app.get('/talker/:id', async (req, res) => {
     });
   }
 });
-
-// Req 03 e Req 04
 
 app.post(
   '/login',

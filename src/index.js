@@ -16,6 +16,7 @@ const {
   validateTalk,
   validateWatchedAt,
   validateRate,
+  validateQueryRate,
 } = require('./middlewares/validateNewTalker');
 
 const OK = 200;
@@ -116,15 +117,15 @@ app.get('/talker', async (req, res) => {
   }
 });
 
-app.get('/talker/search', validateAuthorization, async (req, res) => {
+app.get('/talker/search', validateAuthorization, validateQueryRate, async (req, res) => {
   try {
-    const { q } = req.query;
-    const talkerData = await readTalkerFile();
-    if (q === undefined || q === '') {
-      return res.status(OK).json(talkerData);
+    const { q, rate } = req.query;
+    let talkerData = await readTalkerFile();
+    if (q) talkerData = talkerData.filter((talker) => talker.name.includes(q));
+    if (rate) {
+      talkerData = talkerData.filter((talker) => talker.talk.rate === Number(rate));
     }
-    const filteredTalkers = talkerData.filter((talker) => talker.name.includes(q));
-    res.status(OK).json(filteredTalkers);
+    res.status(OK).json(talkerData);
   } catch (error) {
     res.status(INTERNAL_SERVER_ERROR).send({
       message: error.message,

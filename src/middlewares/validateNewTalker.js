@@ -66,7 +66,20 @@ const validateRate = (req, res, next) => {
     return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
   if (!Number.isInteger(rate) || rate < 1 || rate > 5) {
-    res.status(400).json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+    return res.status(400)
+      .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+  }
+  next();
+};
+
+const validateQueryRate = (req, res, next) => {
+  const { rate } = req.query;
+  if (rate) {
+    const numberRate = Number(rate);
+    if (!Number.isInteger(numberRate) || numberRate < 1 || numberRate > 5) {
+      return res.status(400)
+        .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+    }
   }
   next();
 };
@@ -86,4 +99,5 @@ module.exports = {
   validateTalk,
   validateWatchedAt,
   validateRate,
+  validateQueryRate,
 };

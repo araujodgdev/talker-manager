@@ -1,5 +1,4 @@
 const express = require('express');
-require('express-async-errors');
 const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidV4 } = require('uuid');
@@ -183,8 +182,15 @@ app.put(
   async (req, res) => {
     try {
       const { id } = req.params;
-    const { name, age, talk } = req.body;
-    const updatedTalker = await updateTalker(id, { name, age, talk });
+      const { name, age, talk } = req.body;
+      const updatedTalker = await updateTalker(id, { name, age, talk });
+      const talkerFile = await readTalkerFile();
+      const talkerIndex = talkerFile.findIndex((talker) => talker.id === Number(id));
+      if (talkerIndex < 0) {
+        return res.status(NOT_FOUND).json({
+          message: 'Pessoa palestrante não encontrada',
+        });
+      }
     res.status(OK).json(updatedTalker);
     } catch (error) {
       res.status(INTERNAL_SERVER_ERROR).send({

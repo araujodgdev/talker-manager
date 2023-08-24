@@ -74,6 +74,19 @@ async function writeNewTalker(talkerData) {
   }
 }
 
+async function updateTalker(id, talkerData) {
+  try {
+    const talkerFile = await readTalkerFile();
+    const talkerIndex = talkerFile.findIndex((talker) => talker.id === Number(id));
+    talkerFile[talkerIndex] = { id, ...talkerData };
+    const newTalkerFile = JSON.stringify(talkerFile);
+    await fs.writeFile(TALKER_FILE_PATH, newTalkerFile);
+    return { id, ...talkerData };
+  } catch (error) {
+    return error.message;
+  }
+}
+
 // iniciando o projeto!!! :rocket:
 
 // Req 01
@@ -150,6 +163,28 @@ app.post(
       const { name, age, talk } = req.body;
       const newTalker = await writeNewTalker({ name, age, talk });
       res.status(CREATED).json(newTalker);
+    } catch (error) {
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: error.message,
+      });
+    }
+  },
+);
+
+app.put(
+  '/talker/:id',
+  validateAuthorization,
+  validateName,
+  validateAge,
+  validateTalk,
+  validateRate,
+  validateWatchedAt,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+    const { name, age, talk } = req.body;
+    const updatedTalker = await updateTalker(id, { name, age, talk });
+    res.status(OK).json(updatedTalker);
     } catch (error) {
       res.status(INTERNAL_SERVER_ERROR).send({
         message: error.message,
